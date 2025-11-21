@@ -1,5 +1,5 @@
-import { Schema } from "mongoose";
-import { trim } from "validator";
+import { IFrequency } from "@/types/type";
+import { model, Schema } from "mongoose";
 
 const subscriptionSchema = new Schema(
   {
@@ -57,13 +57,42 @@ const subscriptionSchema = new Schema(
     },
     renewalData: {
       type: Date,
-      required: true,
       validate: {
-        validator: function (v: Date): boolean {
-          return v > this.startDate;
+        validator: function (value: Date): boolean {
+          return value > this.startDate;
         },
+        message: "Renewal Date must be after Start Date",
       },
+    },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
     },
   },
   { timestamps: true },
 );
+
+// auto-calculate the renewal date, if missing
+subscriptionSchema.pre("save", function (next) {
+  if (!this.renewalData) {
+    const renewalPeriods: IFrequency = {
+      daily: 1,
+      weekly: 7,
+      monthly: 30,
+      yearly: 365,
+    };
+
+    this.renewalData = new Date(this.startDate);
+    this.renewalData.setDate(
+      this.renewalData.getDate() + renewalPeriods[this.frequency ?? "monthly"],
+    );
+  }
+  if (this.renewalData < new Date()) {
+    this.status = "expired";
+  }
+  next();
+});
+
+export default model("Subscription", subscriptionSchema);
