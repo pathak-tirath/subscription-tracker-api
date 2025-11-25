@@ -1,8 +1,9 @@
+import { IError } from "@/types/type";
 import logger from "@/utils/logger";
-import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
+import { ErrorRequestHandler } from "express";
 import { Error } from "mongoose";
 
-const errorMessage = (err, req: Request, res: Response, next: NextFunction) => {
+export const errorMessage: ErrorRequestHandler = (err, req, res, next) => {
   try {
     let error = { ...err };
     error.message = err.message;
@@ -24,7 +25,9 @@ const errorMessage = (err, req: Request, res: Response, next: NextFunction) => {
 
     // Mongoose validation error
     if (err.name === "ValidationError") {
-      const message = Object.values(err.errors).map((val) => val.message);
+      const message = Object.values(err.errors as IError[]).map(
+        (val) => val && val?.message,
+      );
       error = new Error(message.join(", "));
       error.statusCode = 400;
     }

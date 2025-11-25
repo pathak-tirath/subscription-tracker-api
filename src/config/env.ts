@@ -1,4 +1,12 @@
-import { config } from 'dotenv';
-config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
+import { config } from "dotenv";
+config({ path: `.env.${process.env.NODE_ENV || "development"}` });
 
-export const {PORT,NODE_ENV, MONGO_URI, LOGGER_LEVEL,SALT} = process.env;
+export const {
+  PORT,
+  NODE_ENV,
+  MONGO_URI,
+  LOGGER_LEVEL,
+  SALT,
+  JWT_SECRET,
+  JWT_EXPIRE,
+} = process.env;

@@ -4,3 +4,9 @@ export interface IFrequency {
   monthly: number;
   yearly: number;
 }
+
+
+export interface IError {
+  message: string;
+  statusCode?: number;
+}
