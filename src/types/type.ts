@@ -1,10 +1,13 @@
+import { Request } from "express";
+import { Jwt, JwtPayload } from "jsonwebtoken";
+import mongoose from "mongoose";
+
 export interface IFrequency {
   daily: number;
   weekly: number;
   monthly: number;
   yearly: number;
 }
-
 
 export interface IError {
   message: string;
@@ -26,4 +29,13 @@ export interface CustomError extends Error {
   statusCode?: number;
   code?: number;
   errors?: unknown;
+}
+
+export interface IJwt extends JwtPayload {
+  id?: string;
+}
+
+
+export interface IRequest extends Request{
+  user?:mongoose.Document
 }

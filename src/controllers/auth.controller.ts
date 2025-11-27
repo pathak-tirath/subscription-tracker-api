@@ -76,42 +76,58 @@ export const signIn = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const { email, password } = req.body;
-  const { authorization } = req.headers;
+  try {
+    const { email, password } = req.body;
 
-  const token = authorization?.split(" ")[1]
- 
+    // Check if values are being passed from client
+    if (!email || !password) {
+      logger.error("Please fill all the required fields");
+      return res.status(400).json({
+        status: false,
+        message: "Required values are not present",
+      });
+    }
 
-  // Check if values are being passed from client
-  if (!email || !password) {
-    logger.error("Please fill all the required fields");
-    return res.status(400).json({
-      status: false,
-      message: "Required values are not present",
+    // Check DB present
+    const user = await User.findOne({ email });
+    if (!user) {
+      logger.error("Requested email is not found");
+      return res.status(400).json({
+        status: false,
+        message: "Requested email is not found",
+      });
+    }
+
+    // Compare passwords
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      logger.error("Credentials invalid!");
+      return res.status(400).json({
+        status: false,
+        message: "Credentials invalid! Please check",
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user._id!,
+      },
+      JWT_SECRET!,
+      { expiresIn: JWT_EXPIRE as ms.StringValue },
+    );
+
+    // Sign-in
+    return res.status(200).json({
+      status: true,
+      message: "User logged in successfully",
+      data: {
+        user: user.email,
+      },
+      token,
     });
+  } catch (error) {
+    next(error);
   }
-
-  // Check DB present
-  const user = await User.findOne({ email });
-  if (!user) {
-    logger.error("Requested email is not found");
-    return res.status(400).json({
-      status: false,
-      message: "Requested email is not found",
-    });
-  }
-
-  // Compare passwords
-  
-  
-  // Sign-in
-  return res.status(200).json({
-    status: true,
-    message: "User logged in successfully",
-    data: {
-      user: user.email,
-    },
-  });
 };
 
 export const signOut = async (
@@ -120,4 +136,5 @@ export const signOut = async (
   next: NextFunction,
 ) => {
   // Sign out logic here
+
 };

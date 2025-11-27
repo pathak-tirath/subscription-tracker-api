@@ -1,12 +1,10 @@
+import { getUserById, getUsers } from "@/controllers/user.controller";
+import { authMiddleware } from "@/middlewares/auth.middleware";
 import { Router } from "express";
 const userRouter = Router();
 
-userRouter.get("/", (req, res) => {
-  res.json({ title: " GET All Users" });
-});
-userRouter.get("/:id", (req, res) => {
-  res.json({ title: " GET Single User" });
-});
+userRouter.get("/", getUsers);
+userRouter.get("/:id",authMiddleware,getUserById);
 userRouter.post("/", (req, res) => {
   res.json({ title: " POST a User" });
 });

@@ -9,6 +9,7 @@ import subscriptionRouter from "./routes/subscription.routes";
 import logger from "@/utils/logger";
 import { connectToDB } from "@/database/db";
 import { errorMessage } from "@/middlewares/error.middleware";
+import { authMiddleware } from "./middlewares/auth.middleware";
 
 const app = express();
 
@@ -20,7 +21,7 @@ app.use(cookieParser());
 
 // Routers
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/users", userRouter);
+app.use("/api/v1/users",userRouter);
 app.use("/api/v1/subscriptions", subscriptionRouter);
 
 // middlewares
