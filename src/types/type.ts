@@ -22,6 +22,7 @@ export interface IEnv {
   SALT?: string;
   JWT_SECRET?: string;
   JWT_EXPIRE?: string;
+  ARCJET_KEY?:string;
 }
 
 // Custom error interface

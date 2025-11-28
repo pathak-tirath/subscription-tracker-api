@@ -10,4 +10,5 @@ export const {
   SALT,
   JWT_SECRET,
   JWT_EXPIRE,
+  ARCJET_KEY,
 } = process.env as IEnv;

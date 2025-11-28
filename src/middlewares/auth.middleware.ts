@@ -17,7 +17,7 @@ export const authMiddleware = async (
     logger.warn(decoded?.id);
 
     const user = await User.findById(decoded?.id);
-    logger.warn(`${user} - user`)
+    logger.warn(`${user} - user`);
     if (!user) {
       logger.warn("Unauthorized");
       return res.status(401).json({
@@ -29,6 +29,9 @@ export const authMiddleware = async (
     req.user = user;
     next();
   } catch (error) {
-    next(error);
+    return res.status(400).json({
+      success: false,
+      message: "Unauthorized!",
+    });
   }
 };
