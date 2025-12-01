@@ -10,7 +10,7 @@ export const arcjetMiddleware = async (
   next: NextFunction,
 ) => {
   try {
-    const decision = await aj.protect(req, { requested: 5 });
+    const decision = await aj.protect(req, { requested: 1 });
 
     logger.warn(decision)
     if (decision.isDenied()) {
