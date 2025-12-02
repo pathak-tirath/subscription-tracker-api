@@ -1,22 +1,20 @@
 import {
+  deleteSubscription,
   getAllSubscriptions,
   getSubscription,
   postSubscription,
+  updateSubscription,
 } from "@/controllers/subscription.controller";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 import { Router } from "express";
 
 const subscriptionRouter = Router();
 
-subscriptionRouter.get("/", authMiddleware, getAllSubscriptions);
+subscriptionRouter.get("/all", authMiddleware, getAllSubscriptions);
 subscriptionRouter.get("/:id", authMiddleware, getSubscription);
 subscriptionRouter.post("/", authMiddleware, postSubscription);
-subscriptionRouter.patch("/:id", (req, res) => {
-  res.json({ title: "UPDATE subscription" });
-});
-subscriptionRouter.delete("/:id", (req, res) => {
-  res.json({ title: "DELETE subscription" });
-});
+subscriptionRouter.patch("/:id", authMiddleware, updateSubscription);
+subscriptionRouter.delete("/:id",authMiddleware, deleteSubscription);
 
 subscriptionRouter.get("/user/:id", (req, res) => {
   res.json({ title: "GET all users subscription" });
