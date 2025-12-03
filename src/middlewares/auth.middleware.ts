@@ -12,12 +12,13 @@ export const authMiddleware = async (
 ) => {
   try {
     const { authorization } = req.headers;
+
     const token = authorization?.split(" ")[1];
+
     const decoded = jwt.verify(token!, JWT_SECRET!) as IJwt;
-    logger.warn(decoded?.id);
 
     const user = await User.findById(decoded?.id);
-    logger.warn(`${user} - user`);
+
     if (!user) {
       logger.warn("Unauthorized");
       return res.status(401).json({

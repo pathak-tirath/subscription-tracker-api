@@ -1,7 +1,12 @@
 import User from "@/models/user.model";
+import { IRequest } from "@/types/type";
 import logger from "@/utils/logger";
 import { NextFunction, Request, Response } from "express";
 
+
+// ? Work later on for the role based access
+
+// For admin - not implemented currently
 export const getUsers = async (
   req: Request,
   res: Response,
@@ -30,13 +35,21 @@ export const getUsers = async (
 };
 
 export const getUserById = async (
-  req: Request,
+  req: IRequest,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    console.log(req.params)
     const { id } = req.params;
+    const userId = req.user!._id.toString();
+
+    // Check if the allowed user is trying to access
+    if (userId !== id) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
 
     const userById = await User.findById(id).select("-password");
     if (!userById) {

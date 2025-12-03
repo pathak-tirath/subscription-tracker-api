@@ -55,7 +55,7 @@ const subscriptionSchema = new Schema(
         message: "Start Date must be in the past",
       },
     },
-    renewalData: {
+    renewalDate: {
       type: Date,
       validate: {
         validator: function (value: Date): boolean {
@@ -76,7 +76,7 @@ const subscriptionSchema = new Schema(
 
 // auto-calculate the renewal date, if missing
 subscriptionSchema.pre("save", function (next) {
-  if (!this.renewalData) {
+  if (!this.renewalDate) {
     const renewalPeriods: IFrequency = {
       daily: 1,
       weekly: 7,
@@ -84,12 +84,12 @@ subscriptionSchema.pre("save", function (next) {
       yearly: 365,
     };
 
-    this.renewalData = new Date(this.startDate);
-    this.renewalData.setDate(
-      this.renewalData.getDate() + renewalPeriods[this.frequency ?? "monthly"],
+    this.renewalDate = new Date(this.startDate);
+    this.renewalDate.setDate(
+      this.renewalDate.getDate() + renewalPeriods[this.frequency ?? "monthly"],
     );
   }
-  if (this.renewalData < new Date()) {
+  if (this.renewalDate < new Date()) {
     this.status = "expired";
   }
   next();

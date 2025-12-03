@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { Jwt, JwtPayload } from "jsonwebtoken";
+import { JwtPayload } from "jsonwebtoken";
 import mongoose from "mongoose";
 
 export interface IFrequency {
@@ -22,7 +22,7 @@ export interface IEnv {
   SALT?: string;
   JWT_SECRET?: string;
   JWT_EXPIRE?: string;
-  ARCJET_KEY?:string;
+  ARCJET_KEY?: string;
 }
 
 // Custom error interface
@@ -36,7 +36,7 @@ export interface IJwt extends JwtPayload {
   id?: string;
 }
 
-
-export interface IRequest extends Request{
-  user?:mongoose.Document
+export interface IRequest extends Request {
+  user?: mongoose.Document;
+  subscription?: mongoose.Document;
 }

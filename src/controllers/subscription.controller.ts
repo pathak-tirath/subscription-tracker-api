@@ -9,7 +9,9 @@ export const getAllSubscriptions = async (
   next: NextFunction,
 ) => {
   try {
-    const subscriptions = await Subscription.find({}).select("-user");
+    const subscriptions = await Subscription.find({
+      user: req.user!._id,
+    }).select("-user");
     if (subscriptions.length === 0) {
       return res.status(200).json({
         status: false,
@@ -28,8 +30,8 @@ export const getSubscription = async (
   next: NextFunction,
 ) => {
   try {
-    const id = req.params.id;
-    const subscription = await Subscription.findById(id).select("-user");
+    const subscription = req.subscription;
+
     if (!subscription) {
       return res.status(200).json({
         status: false,
@@ -131,6 +133,77 @@ export const deleteSubscription = async (
     res.status(204).json({
       success: true,
       message: "Subscription is deleted successfully",
+    });
+  } catch (error) {
+    logger.error(error);
+    next(error);
+  }
+};
+
+export const cancelSubscription = async (
+  req: IRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    const body = req.body;
+
+    const subscriptionCancel = await Subscription.findByIdAndUpdate(id, body, {
+      returnDocument: "after",
+    });
+
+    if (!subscriptionCancel) {
+      return res.status(500).json({
+        success: false,
+        message: "Unable to cancel subscription",
+      });
+    }
+
+    res.status(200).json({
+      status: true,
+      message: "Subscription has been cancelled",
+      data: subscriptionCancel,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const upcomingSubscriptions = async (
+  req: IRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user!._id.toString();
+
+    // Check if the allowed user is trying to access
+    if (userId !== id) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const today = new Date();
+    const nextWeek = new Date(today)
+    nextWeek.setDate(today.getDate() + 7)
+    
+    const subscription = await Subscription.find({ user: userId, renewalDate: {$lte: nextWeek} }).select(
+      "-user",
+    );
+    if (!subscription) {
+      return res.status(400).json({
+        success: false,
+        message: "No User found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: subscription,
     });
   } catch (error) {
     logger.error(error);
