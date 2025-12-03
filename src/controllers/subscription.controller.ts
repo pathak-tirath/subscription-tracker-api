@@ -3,22 +3,45 @@ import { IRequest } from "@/types/type";
 import logger from "@/utils/logger";
 import { NextFunction, Response } from "express";
 
+
+/**
+ * Aggregation pipelines below. The pipelines are always an array
+ */
 export const getAllSubscriptions = async (
   req: IRequest,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const subscriptions = await Subscription.find({
-      user: req.user!._id,
-    }).select("-user");
+    const result = await Subscription.aggregate([
+      {
+        $match: {
+          user: req.user!._id,
+        },
+      },
+      {
+        $project: {
+          user: 0,
+        },
+      },
+      {
+        $facet: {
+          subscriptions: [{ $sort: { createdAt: -1 } }],
+          count: [{ $count: "total" }],
+        },
+      },
+    ]);
+
+    const subscriptions = result[0].subscriptions;
+    const count = result[0].count[0]?.total ?? 0;
+
     if (subscriptions.length === 0) {
       return res.status(200).json({
         status: false,
         message: "No subscriptions found",
       });
     }
-    return res.status(200).json(subscriptions);
+    return res.status(200).json({ subscriptions, total: count });
   } catch (error) {
     next(error);
   }
@@ -188,12 +211,13 @@ export const upcomingSubscriptions = async (
     }
 
     const today = new Date();
-    const nextWeek = new Date(today)
-    nextWeek.setDate(today.getDate() + 7)
-    
-    const subscription = await Subscription.find({ user: userId, renewalDate: {$lte: nextWeek} }).select(
-      "-user",
-    );
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+
+    const subscription = await Subscription.find({
+      user: userId,
+      renewalDate: { $lte: nextWeek },
+    }).select("-user");
     if (!subscription) {
       return res.status(400).json({
         success: false,
