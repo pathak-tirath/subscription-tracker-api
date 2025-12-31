@@ -5,7 +5,7 @@
     "description": "This is API for all the subscriptions",
     "version": "1.0.0"
   },
-  "host": "localhost:5000",
+  "host": "localhost:3000",
   "basePath": "/",
   "schemes": [
     "http"
@@ -19,7 +19,23 @@
     }
   },
   "paths": {
-    "/sign-up": {
+    "/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/sign-up": {
       "post": {
         "tags": [
           "Auth"
@@ -53,13 +69,19 @@
           "201": {
             "description": "Created"
           },
+          "403": {
+            "description": "Forbidden"
+          },
           "409": {
             "description": "Conflict"
+          },
+          "429": {
+            "description": "Too Many Requests"
           }
         }
       }
     },
-    "/sign-in": {
+    "/api/v1/auth/sign-in": {
       "post": {
         "tags": [
           "Auth"
@@ -91,50 +113,52 @@
           },
           "400": {
             "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "429": {
+            "description": "Too Many Requests"
           }
         }
       }
     },
-    "/logout": {
+    "/api/v1/auth/logout": {
       "post": {
         "tags": [
           "Auth"
         ],
         "description": "",
         "responses": {
-          "default": {
-            "description": ""
+          "403": {
+            "description": "Forbidden"
+          },
+          "429": {
+            "description": "Too Many Requests"
           }
         }
       }
     },
-    "/all": {
+    "/api/v1/users/": {
       "get": {
         "tags": [
-          "Subscriptions"
+          "Users"
         ],
         "description": "",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
           },
-          "400": {
-            "description": "Bad Request"
+          "403": {
+            "description": "Forbidden"
           },
-          "401": {
-            "description": "Unauthorized"
+          "429": {
+            "description": "Too Many Requests"
           }
         }
       }
     },
-    "/{id}": {
+    "/api/v1/users/{id}": {
       "get": {
         "tags": [
           "Users"
@@ -165,6 +189,79 @@
           },
           "403": {
             "description": "Forbidden"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/api/v1/subscription/all": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        }
+      }
+    },
+    "/api/v1/subscription/{id}": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "429": {
+            "description": "Too Many Requests"
           }
         }
       },
@@ -216,6 +313,9 @@
           },
           "403": {
             "description": "Forbidden"
+          },
+          "429": {
+            "description": "Too Many Requests"
           }
         }
       },
@@ -250,13 +350,16 @@
           "403": {
             "description": "Forbidden"
           },
+          "429": {
+            "description": "Too Many Requests"
+          },
           "500": {
             "description": "Internal Server Error"
           }
         }
       }
     },
-    "/": {
+    "/api/v1/subscription/": {
       "post": {
         "tags": [
           "Subscriptions"
@@ -317,24 +420,19 @@
           "401": {
             "description": "Unauthorized"
           },
+          "403": {
+            "description": "Forbidden"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          },
           "500": {
             "description": "Internal Server Error"
           }
         }
-      },
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
       }
     },
-    "/{id}/cancel": {
+    "/api/v1/subscription/{id}/cancel": {
       "patch": {
         "tags": [
           "Subscriptions"
@@ -366,13 +464,16 @@
           "403": {
             "description": "Forbidden"
           },
+          "429": {
+            "description": "Too Many Requests"
+          },
           "500": {
             "description": "Internal Server Error"
           }
         }
       }
     },
-    "/upcoming-renewals/{id}": {
+    "/api/v1/subscription/upcoming-renewals/{id}": {
       "get": {
         "tags": [
           "Subscriptions"
@@ -403,6 +504,9 @@
           },
           "403": {
             "description": "Forbidden"
+          },
+          "429": {
+            "description": "Too Many Requests"
           }
         }
       }

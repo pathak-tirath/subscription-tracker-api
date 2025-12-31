@@ -2,8 +2,9 @@ import { signIn, signOut, signUp } from "@/controllers/auth.controller";
 import { Router } from "express";
 const authRouter = Router();
 
-authRouter.post("/sign-up", /* #swagger.tags = ['Auth'] */
-    /*  #swagger.parameters['body'] = {
+authRouter.post(
+  "/sign-up" /* #swagger.tags = ['Auth'] */,
+  /*  #swagger.parameters['body'] = {
           in: 'body',
           required: true,
           schema: {
@@ -12,9 +13,11 @@ authRouter.post("/sign-up", /* #swagger.tags = ['Auth'] */
             password: 'password123'
           }
     } */
-    signUp);
-authRouter.post("/sign-in", /* #swagger.tags = ['Auth'] */
-    /*  #swagger.parameters['body'] = {
+  signUp,
+);
+authRouter.post(
+  "/sign-in" /* #swagger.tags = ['Auth'] */,
+  /*  #swagger.parameters['body'] = {
           in: 'body',
           required: true,
           schema: {
@@ -22,7 +25,8 @@ authRouter.post("/sign-in", /* #swagger.tags = ['Auth'] */
             password: 'password123'
           }
     } */
-    signIn);
+  signIn,
+);
 authRouter.post("/logout", /* #swagger.tags = ['Auth'] */ signOut);
 
 export default authRouter;

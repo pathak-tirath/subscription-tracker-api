@@ -1,3 +1,4 @@
+import { PORT } from "@/config/env";
 import swaggerAutogen from "swagger-autogen";
 
 const doc = {
@@ -5,7 +6,7 @@ const doc = {
     title: "Subscription API",
     description: "This is API for all the subscriptions",
   },
-  host: "localhost:5000",
+  host: `localhost:${PORT}`,
   securityDefinitions: {
     bearerAuth: {
       type: "apiKey",
@@ -17,6 +18,6 @@ const doc = {
 };
 
 const outputFile = "./swagger-output.json";
-const routes = ["../routes/*.routes.ts"];
+const routes = ["../app.ts"];
 
 swaggerAutogen()(outputFile, routes, doc);
