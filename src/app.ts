@@ -1,4 +1,5 @@
 import express from "express";
+import swaggerUi from 'swagger-ui-express'
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 
@@ -10,6 +11,7 @@ import logger from "@/utils/logger";
 import { connectToDB } from "@/database/db";
 import { errorMessage } from "@/middlewares/error.middleware";
 import { arcjetMiddleware } from "@/middlewares/arcjet.middleware";
+import swaggerFile from './swagger/swagger-output.json'
 
 const app = express();
 
@@ -24,6 +26,7 @@ app.use(arcjetMiddleware)
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users",userRouter);
 app.use("/api/v1/subscription", subscriptionRouter);
+app.use("/api-doc", swaggerUi.serve,swaggerUi.setup(swaggerFile));
 
 // middlewares
 app.use(errorMessage);

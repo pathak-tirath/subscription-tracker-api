@@ -7,6 +7,7 @@
   "scripts": {
     "start": "tsx src/app.ts",
     "dev": "tsx watch src/app.ts",
+    "swagger": "tsx src/swagger/swagger.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write \"src/**/*.{ts,tsx,json}\"",
@@ -23,6 +24,7 @@
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/mongoose": "^5.11.97",
+    "@types/swagger-ui-express": "^4.1.8",
     "@types/validator": "^13.15.10",
     "@typescript-eslint/eslint-plugin": "^8.47.0",
     "@typescript-eslint/parser": "^8.47.0",
@@ -47,6 +49,8 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.20.0",
+    "swagger-autogen": "^2.23.7",
+    "swagger-ui-express": "^5.0.1",
     "validator": "^13.15.23",
     "winston": "^3.18.3"
   }

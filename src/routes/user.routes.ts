@@ -3,8 +3,8 @@ import { authMiddleware } from "@/middlewares/auth.middleware";
 import { Router } from "express";
 const userRouter = Router();
 
-userRouter.get("/", getUsers);
-userRouter.get("/:id",authMiddleware,getUserById);
+userRouter.get("/", /* #swagger.tags = ['Users'] */ getUsers);
+userRouter.get("/:id", authMiddleware, /* #swagger.tags = ['Users'] */ getUserById);
 
 // ? For future enhancements
 // userRouter.post("/", (req, res) => {
