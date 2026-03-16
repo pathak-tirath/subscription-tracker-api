@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import { JWT_EXPIRE, JWT_SECRET } from "@/config/env";
+import {  IUserRequest } from "@/types/type";
 
 export const signUp = async (
   req: Request,
@@ -52,18 +53,24 @@ export const signUp = async (
     });
 
     // Send response
-    return res.status(201).json({
-      status: true,
-      message: "User created successfully",
-      data: {
-        token,
-        user: {
-          id: newUser[0]!._id,
-          name: newUser[0]!.name,
-          email: newUser[0]!.email,
+    return res
+      .status(201)
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+      })
+      .json({
+        status: true,
+        message: "User created successfully",
+        data: {
+          user: {
+            id: newUser[0]!._id,
+            name: newUser[0]!.name,
+            email: newUser[0]!.email,
+          },
         },
-      },
-    });
+      });
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -104,7 +111,7 @@ export const signIn = async (
       logger.error("Credentials invalid!");
       return res.status(400).json({
         status: false,
-        message: "Credentials invalid! Please check",
+        message: "Credentials invalid! PleaseIUser check",
       });
     }
 
@@ -117,24 +124,36 @@ export const signIn = async (
     );
 
     // Sign-in
-    return res.status(200).json({
-      status: true,
-      message: "User logged in successfully",
-      data: {
-        user: user.email,
-      },
-      token,
-    });
+    return res
+      .status(200)
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+      })
+      .json({
+        status: true,
+        message: "User logged in successfully",
+        data: {
+          user: user.email,
+        },
+      });
   } catch (error) {
     next(error);
   }
 };
 
-export const signOut = async (
-  req: Request,
+export const getCurrentUser = async (
+  req: IUserRequest,
   res: Response,
   next: NextFunction,
 ) => {
-  // Sign out logic here
-
+  try {
+    res.status(200).json({
+      authenticated: true,
+      user:req.user,
+    });
+  } catch (error) {
+    next(error);
+  }
 };

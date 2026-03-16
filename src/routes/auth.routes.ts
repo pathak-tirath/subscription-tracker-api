@@ -1,4 +1,5 @@
-import { signIn, signOut, signUp } from "@/controllers/auth.controller";
+import { getCurrentUser, signIn, signUp } from "@/controllers/auth.controller";
+import { authMiddleware } from "@/middlewares/auth.middleware";
 import { Router } from "express";
 const authRouter = Router();
 
@@ -27,6 +28,6 @@ authRouter.post(
     } */
   signIn,
 );
-authRouter.post("/logout", /* #swagger.tags = ['Auth'] */ signOut);
+authRouter.get("/auth/me", authMiddleware,getCurrentUser)
 
 export default authRouter;

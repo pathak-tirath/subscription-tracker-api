@@ -123,22 +123,7 @@
         }
       }
     },
-    "/api/v1/auth/logout": {
-      "post": {
-        "tags": [
-          "Auth"
-        ],
-        "description": "",
-        "responses": {
-          "403": {
-            "description": "Forbidden"
-          },
-          "429": {
-            "description": "Too Many Requests"
-          }
-        }
-      }
-    },
+    
     "/api/v1/users/": {
       "get": {
         "tags": [

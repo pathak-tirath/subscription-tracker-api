@@ -40,3 +40,7 @@ export interface IRequest extends Request {
   user?: mongoose.Document;
   subscription?: mongoose.Document;
 }
+
+export interface IUserRequest extends Request {
+  user?: mongoose.Document;
+}
