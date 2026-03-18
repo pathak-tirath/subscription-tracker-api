@@ -15,7 +15,7 @@ import swaggerFile from "./swagger/swagger-output.json";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({credentials:true}));
 
 // * Helmet security middleware
 app.use(helmet());

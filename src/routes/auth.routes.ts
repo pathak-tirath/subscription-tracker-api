@@ -28,6 +28,6 @@ authRouter.post(
     } */
   signIn,
 );
-authRouter.get("/auth/me", authMiddleware,getCurrentUser)
+authRouter.get("/me", authMiddleware,getCurrentUser)
 
 export default authRouter;
