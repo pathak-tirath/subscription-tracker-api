@@ -11,10 +11,9 @@ export const authMiddleware = async (
   next: NextFunction,
 ) => {
   try {
-    const { authorization } = req.headers;
+    
 
-    const token = authorization?.split(" ")[1];
-
+    const token = req.cookies['token'];
     const decoded = jwt.verify(token!, JWT_SECRET!) as IJwt;
 
     const user = await User.findById(decoded?.id);

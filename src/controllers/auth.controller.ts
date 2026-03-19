@@ -6,7 +6,9 @@ import jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import { JWT_EXPIRE, JWT_SECRET } from "@/config/env";
-import {  IUserRequest } from "@/types/type";
+import { IUserRequest } from "@/types/type";
+
+const isProduction = process.env.NODE_ENV === "production"
 
 export const signUp = async (
   req: Request,
@@ -30,6 +32,8 @@ export const signUp = async (
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    
 
     // Create new user
     const newUser = await User.create(
@@ -57,8 +61,8 @@ export const signUp = async (
       .status(201)
       .cookie("token", token, {
         httpOnly: true,
-        secure: true,
-        sameSite: "strict",
+        secure: isProduction,
+        sameSite: isProduction ? "strict" : "lax",
       })
       .json({
         status: true,
@@ -84,6 +88,7 @@ export const signIn = async (
   next: NextFunction,
 ) => {
   try {
+    
     const { email, password } = req.body;
 
     // Check if values are being passed from client
@@ -126,10 +131,10 @@ export const signIn = async (
     // Sign-in
     return res
       .status(200)
-      .cookie("token", token, {
+       .cookie("token", token, {
         httpOnly: true,
-        secure: true,
-        sameSite: "strict",
+        secure: isProduction,
+        sameSite: isProduction ? "strict" : "lax",
       })
       .json({
         status: true,
@@ -151,7 +156,7 @@ export const getCurrentUser = async (
   try {
     res.status(200).json({
       authenticated: true,
-      user:req.user,
+      user: req.user,
     });
   } catch (error) {
     next(error);
