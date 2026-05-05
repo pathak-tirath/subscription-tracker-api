@@ -16,7 +16,7 @@ export const getAllSubscriptions = async (
     const result = await Subscription.aggregate([
       {
         $match: {
-          user: req.user!._id,
+          user: req.user!._id,  // finds the subscriptions for the logged-in user.Without this, it would return all subscriptions in the database, which is a security risk.
         },
       },
       {
@@ -25,13 +25,14 @@ export const getAllSubscriptions = async (
         },
       },
       {
-        $facet: {
+        $facet: { // lets you run multiple aggregation pipelines in parallel on the same dataset, returning all results in a single query.
           subscriptions: [{ $sort: { createdAt: -1 } }],
           count: [{ $count: "total" }],
         },
       },
     ]);
 
+    // Result returns an array with one object containing the subscriptions and count
     const subscriptions = result[0].subscriptions;
     const count = result[0].count[0]?.total ?? 0;
 
