@@ -12,6 +12,7 @@ import { connectToDB } from "@/database/db";
 import { errorMessage } from "@/middlewares/error.middleware";
 import { arcjetMiddleware } from "@/middlewares/arcjet.middleware";
 import swaggerFile from "./swagger/swagger-output.json";
+import analyticsRouter from "./routes/analytics.routes";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(arcjetMiddleware);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/subscription", subscriptionRouter);
+app.use("/api/v1/analytics", analyticsRouter)
 app.use("/api-doc", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 // middlewares

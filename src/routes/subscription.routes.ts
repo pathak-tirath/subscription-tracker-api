@@ -1,5 +1,5 @@
 import {
-  cancelSubscription,
+  updateStatusSubscription,
   deleteSubscription,
   getAllSubscriptions,
   getSubscription,
@@ -13,7 +13,11 @@ import { Router } from "express";
 
 const subscriptionRouter = Router();
 
-subscriptionRouter.get("/all", authMiddleware, /* #swagger.tags = ['Subscriptions'] */ getAllSubscriptions);
+subscriptionRouter.get(
+  "/all",
+  authMiddleware,
+  /* #swagger.tags = ['Subscriptions'] */ getAllSubscriptions,
+);
 subscriptionRouter.get(
   "/:id",
   authMiddleware,
@@ -21,7 +25,10 @@ subscriptionRouter.get(
   /* #swagger.tags = ['Subscriptions'] */
   getSubscription,
 );
-subscriptionRouter.post("/", authMiddleware, /* #swagger.tags = ['Subscriptions'] */
+
+subscriptionRouter.post(
+  "/",
+  authMiddleware /* #swagger.tags = ['Subscriptions'] */,
   /*  #swagger.parameters['body'] = {
         in: 'body',
         required: true,
@@ -35,7 +42,8 @@ subscriptionRouter.post("/", authMiddleware, /* #swagger.tags = ['Subscriptions'
           startDate: '2025-01-01'
         }
   } */
-  postSubscription);
+  postSubscription,
+);
 subscriptionRouter.patch(
   "/:id",
   authMiddleware,
@@ -65,12 +73,16 @@ subscriptionRouter.delete(
 // });
 
 subscriptionRouter.patch(
-  "/:id/cancel",
+  "/:id/status",
   authMiddleware,
   subscriptionMiddleware,
   /* #swagger.tags = ['Subscriptions'] */
-  cancelSubscription,
+  updateStatusSubscription,
 );
-subscriptionRouter.get("/upcoming-renewals/:id", authMiddleware, /* #swagger.tags = ['Subscriptions'] */ upcomingSubscriptions);
+subscriptionRouter.get(
+  "/upcoming-renewals/:id",
+  authMiddleware,
+  /* #swagger.tags = ['Subscriptions'] */ upcomingSubscriptions,
+);
 
 export default subscriptionRouter;

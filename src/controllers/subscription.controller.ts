@@ -1,8 +1,8 @@
+import { SubsStatus } from "@/enum/enum";
 import Subscription from "@/models/subscription.model";
 import { IRequest } from "@/types/type";
 import logger from "@/utils/logger";
 import { NextFunction, Response } from "express";
-
 
 /**
  * Aggregation pipelines below. The pipelines are always an array
@@ -13,10 +13,15 @@ export const getAllSubscriptions = async (
   next: NextFunction,
 ) => {
   try {
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+    const startOfCurrentMonth = new Date(currentYear, currentMonth - 1, 1);
+
     const result = await Subscription.aggregate([
       {
         $match: {
-          user: req.user!._id,  // finds the subscriptions for the logged-in user.Without this, it would return all subscriptions in the database, which is a security risk.
+          user: req.user!._id, // finds the subscriptions for the logged-in user.Without this, it would return all subscriptions in the database, which is a security risk.
         },
       },
       {
@@ -25,9 +30,71 @@ export const getAllSubscriptions = async (
         },
       },
       {
-        $facet: { // lets you run multiple aggregation pipelines in parallel on the same dataset, returning all results in a single query.
+        $facet: {
+          // lets you run multiple aggregation pipelines in parallel on the same dataset, returning all results in a single query.
           subscriptions: [{ $sort: { createdAt: -1 } }],
           count: [{ $count: "total" }],
+          active: [
+            { $match: { status: SubsStatus.ACTIVE } },
+            { $count: "activeCount" },
+          ],
+          paused: [
+            { $match: { status: SubsStatus.PAUSED } },
+            { $count: "pausedCount" },
+          ],
+          expired: [
+            { $match: { status: SubsStatus.EXPIRED } },
+            { $count: "expiredCount" },
+          ],
+          cancelled: [
+            { $match: { status: SubsStatus.CANCELLED } },
+            { $count: "cancelledCount" },
+          ],
+          subscriptionsAdded: [
+            {
+              $match: {
+                status: SubsStatus.ACTIVE,
+                $expr: {
+                  $and: [
+                    { $eq: [{ $month: "$startDate" }, currentMonth] },
+                    { $eq: [{ $year: "$startDate" }, currentYear] },
+                  ],
+                },
+              },
+            },
+            {
+              $count: "subscriptionActiveCount",
+            },
+          ],
+          subscriptionsPaused: [
+            {
+              $match: {
+                status: SubsStatus.PAUSED,
+                $expr: {
+                  $and: [
+                    { $eq: [{ $month: "$updatedAt" }, currentMonth] },
+                    { $eq: [{ $year: "$updatedAt" }, currentYear] },
+                  ],
+                },
+              },
+            },
+            {
+              $count: "subscriptionsPausedCount",
+            },
+          ],
+          amountSaved: [
+            {
+              $match: {
+                status: SubsStatus.CANCELLED,
+                updatedAt: {
+                  $lt: startOfCurrentMonth,
+                },
+              },
+            },
+            {
+              $group: { _id: null, totalSaved: { $sum: "$price" } },
+            },
+          ],
         },
       },
     ]);
@@ -35,6 +102,17 @@ export const getAllSubscriptions = async (
     // Result returns an array with one object containing the subscriptions and count
     const subscriptions = result[0].subscriptions;
     const count = result[0].count[0]?.total ?? 0;
+    const activeCount = result[0]?.active[0]?.activeCount ?? 0;
+    const activePercentage = (activeCount / count) * 100;
+    const pausedCount = result[0]?.paused[0]?.pausedCount ?? 0;
+    const expiredCount = result[0]?.expired[0]?.expiredCount ?? 0;
+    const cancelledCount = result[0]?.cancelled[0]?.cancelledCount ?? 0;
+    const subscriptionsAdded =
+      result[0]?.subscriptionsAdded[0]?.subscriptionActiveCount ?? 0;
+    const subscriptionsPaused =
+      result[0]?.subscriptionsPaused[0]?.subscriptionsPausedCount ?? 0;
+
+    const amountSaved = result[0]?.amountSaved[0]?.totalSaved ?? 0;
 
     if (subscriptions.length === 0) {
       return res.status(200).json({
@@ -42,7 +120,18 @@ export const getAllSubscriptions = async (
         message: "No subscriptions found",
       });
     }
-    return res.status(200).json({ subscriptions, total: count });
+    return res.status(200).json({
+      subscriptions,
+      total: count,
+      active: activeCount,
+      activePercent: activePercentage,
+      paused: pausedCount,
+      expired: expiredCount,
+      cancelled: cancelledCount,
+      subsAddedThisMonth: subscriptionsAdded,
+      subsPausedThisMonth: subscriptionsPaused,
+      totalAmountSaved: amountSaved,
+    });
   } catch (error) {
     next(error);
   }
@@ -164,7 +253,7 @@ export const deleteSubscription = async (
   }
 };
 
-export const cancelSubscription = async (
+export const updateStatusSubscription = async (
   req: IRequest,
   res: Response,
   next: NextFunction,
@@ -186,7 +275,7 @@ export const cancelSubscription = async (
 
     res.status(200).json({
       status: true,
-      message: "Subscription has been cancelled",
+      message: "Subscription has been updated",
       data: subscriptionCancel,
     });
   } catch (error) {

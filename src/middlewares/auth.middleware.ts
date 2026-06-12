@@ -12,7 +12,7 @@ export const authMiddleware = async (
 ) => {
   try {
     
-
+    // TODO: Implement access and refresh token. Also token whitelisting and blacklisting.
     const token = req.cookies['token'];
     const decoded = jwt.verify(token!, JWT_SECRET!) as IJwt;
 
@@ -22,7 +22,7 @@ export const authMiddleware = async (
       logger.warn("Unauthorized");
       return res.status(401).json({
         status: false,
-        message: "Unauthorized",
+        message: "Unauthorized",  
       });
     }
 
