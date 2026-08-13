@@ -46,7 +46,7 @@ export const getMonthlyExpenses = async (
       },
       {
         $group: {
-          _id: {  
+          _id: {
             year: { $year: "$createdAt" },
             month: { $month: "$createdAt" },
           },
@@ -61,9 +61,62 @@ export const getMonthlyExpenses = async (
       },
     ]);
 
-    console.log(result);
+    return res.status(200).json({ message: result });
+  } catch (error) {
+    next(error);
+  }
+};
 
-    return res.status(200).json({ message: period });
+export const getSpendByCategory = async (
+  req: IRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const period = req.query?.period;
+    let startDate = new Date();
+
+    switch (period) {
+      case FilterPeriod["1m"]:
+        startDate.setMonth(startDate.getMonth() - 1);
+        break;
+
+      case FilterPeriod["6m"]:
+        startDate.setMonth(startDate.getMonth() - 6);
+        break;
+
+      case FilterPeriod["1y"]:
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        break;
+
+      default:
+        startDate = new Date(0);
+    }
+
+    const result = await Subscription.aggregate([
+      {
+        $match: {
+          user: req.user!._id,
+          createdAt: {
+            $gte: startDate,
+          },
+        },
+      },
+      {
+        $project: {
+          user: 0,
+        },
+      },
+      {
+        $group: {
+          _id: "$category",
+          totalAmount: { $sum: "$price" },
+        },
+      },
+  
+    ]);
+
+    return res.status(200).json({ message: result });
   } catch (error) {
     next(error);
   }

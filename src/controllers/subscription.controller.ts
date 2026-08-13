@@ -13,6 +13,13 @@ export const getAllSubscriptions = async (
   next: NextFunction,
 ) => {
   try {
+    // for limit and pagination
+
+    
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
     const now = new Date();
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
@@ -32,7 +39,11 @@ export const getAllSubscriptions = async (
       {
         $facet: {
           // lets you run multiple aggregation pipelines in parallel on the same dataset, returning all results in a single query.
-          subscriptions: [{ $sort: { createdAt: -1 } }],
+          subscriptions: [
+            { $sort: { startDate: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+          ],
           count: [{ $count: "total" }],
           active: [
             { $match: { status: SubsStatus.ACTIVE } },
@@ -102,6 +113,7 @@ export const getAllSubscriptions = async (
     // Result returns an array with one object containing the subscriptions and count
     const subscriptions = result[0].subscriptions;
     const count = result[0].count[0]?.total ?? 0;
+
     const activeCount = result[0]?.active[0]?.activeCount ?? 0;
     const activePercentage = (activeCount / count) * 100;
     const pausedCount = result[0]?.paused[0]?.pausedCount ?? 0;
@@ -123,6 +135,8 @@ export const getAllSubscriptions = async (
     return res.status(200).json({
       subscriptions,
       total: count,
+      totalPages: Math.ceil(count / limit),
+
       active: activeCount,
       activePercent: activePercentage,
       paused: pausedCount,
@@ -154,6 +168,55 @@ export const getSubscription = async (
     return res.status(200).json(subscription);
   } catch (error) {
     next(error);
+  }
+};
+
+export const getUpcomingPayment = async (
+  req: IRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+    nextWeek.setHours(23, 59, 59, 999);
+
+    const subscriptions = await Subscription.find({
+      user: req.user!._id,
+      status: SubsStatus.ACTIVE,
+      renewalDate: {
+        $gte: today,
+        $lte: nextWeek,
+      },
+    })
+      .select("name frequency price currency renewalDate")
+      .sort({ renewalDate: 1 })
+      .lean();
+
+    const upcomingPayments = subscriptions.map((subscription) => {
+      const renewalDate = new Date(subscription.renewalDate!);
+      const daysLeft = Math.ceil(
+        (renewalDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+      );
+
+      return {
+        serviceName: subscription.name,
+        billingCycle: subscription.frequency,
+        daysLeft,
+        amount: subscription.price,
+        currency: subscription.currency,
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: upcomingPayments,
+    });
+  } catch (error) {
+    return next(error);
   }
 };
 

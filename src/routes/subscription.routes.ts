@@ -2,6 +2,7 @@ import {
   updateStatusSubscription,
   deleteSubscription,
   getAllSubscriptions,
+  getUpcomingPayment,
   getSubscription,
   postSubscription,
   upcomingSubscriptions,
@@ -17,6 +18,11 @@ subscriptionRouter.get(
   "/all",
   authMiddleware,
   /* #swagger.tags = ['Subscriptions'] */ getAllSubscriptions,
+);
+subscriptionRouter.get(
+  "/upcoming-payments",
+  authMiddleware,
+  /* #swagger.tags = ['Subscriptions'] */ getUpcomingPayment,
 );
 subscriptionRouter.get(
   "/:id",
