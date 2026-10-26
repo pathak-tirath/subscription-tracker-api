@@ -6,7 +6,8 @@ import jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import { JWT_EXPIRE, JWT_SECRET } from "@/config/env";
-import { IUserRequest } from "@/types/type";
+import { IUserRequest, requireAuthenticatedUser } from "@/types/type";
+import { signInSchema, signUpSchema } from "@/validation/schemas";
 
 const isProduction = process.env.NODE_ENV === "production"
 
@@ -19,7 +20,7 @@ export const signUp = async (
   session.startTransaction();
 
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password } = signUpSchema.parse(req.body);
 
     // Check if user exists
     const existingUser = await User.findOne({ email }).session(session);
@@ -78,7 +79,7 @@ export const signUp = async (
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    next(error);
+    return next(error);
   }
 };
 
@@ -89,7 +90,7 @@ export const signIn = async (
 ) => {
   try {
     
-    const { email, password } = req.body;
+    const { email, password } = signInSchema.parse(req.body);
 
     // Check if values are being passed from client
     if (!email || !password) {
@@ -144,7 +145,7 @@ export const signIn = async (
         },
       });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -156,9 +157,10 @@ export const getCurrentUser = async (
   try {
     res.status(200).json({
       authenticated: true,
-      user: req.user,
+      user: requireAuthenticatedUser(req),
     });
   } catch (error) {
     next(error);
   }
 };
+

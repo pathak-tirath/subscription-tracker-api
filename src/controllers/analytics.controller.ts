@@ -1,11 +1,11 @@
 import { FilterPeriod } from "@/enum/enum";
 import Subscription from "@/models/subscription.model";
 
-import { IRequest } from "@/types/type";
+import { IAuthenticatedRequest, requireAuthenticatedUser } from "@/types/type";
 import { NextFunction, Response } from "express";
 
 export const getMonthlyExpenses = async (
-  req: IRequest,
+  req: IAuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => {
@@ -33,7 +33,7 @@ export const getMonthlyExpenses = async (
     const result = await Subscription.aggregate([
       {
         $match: {
-          user: req.user!._id,
+          user: requireAuthenticatedUser(req)._id,
           createdAt: {
             $gte: startDate,
           },
@@ -63,12 +63,12 @@ export const getMonthlyExpenses = async (
 
     return res.status(200).json({ message: result });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
 export const getSpendByCategory = async (
-  req: IRequest,
+  req: IAuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => {
@@ -96,7 +96,7 @@ export const getSpendByCategory = async (
     const result = await Subscription.aggregate([
       {
         $match: {
-          user: req.user!._id,
+          user: requireAuthenticatedUser(req)._id,
           createdAt: {
             $gte: startDate,
           },
@@ -118,6 +118,8 @@ export const getSpendByCategory = async (
 
     return res.status(200).json({ message: result });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
+
+

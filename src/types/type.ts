@@ -1,6 +1,7 @@
 import { Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
-import mongoose from "mongoose";
+import type { UserDocument } from "@/models/user.model";
+import type { SubscriptionDocument } from "@/models/subscription.model";
 
 export interface IFrequency {
   daily: number;
@@ -37,10 +38,19 @@ export interface IJwt extends JwtPayload {
 }
 
 export interface IRequest extends Request {
-  user?: mongoose.Document;
-  subscription?: mongoose.Document;
+  user?: UserDocument;
+  subscription?: SubscriptionDocument;
 }
 
-export interface IUserRequest extends Request {
-  user?: mongoose.Document;
+export interface IAuthenticatedRequest extends Request {
+  user?: UserDocument;
+  subscription?: SubscriptionDocument;
 }
+
+export interface IUserRequest extends IAuthenticatedRequest {}
+
+export const requireAuthenticatedUser = (req: IAuthenticatedRequest): UserDocument => {
+  if (!req.user) throw new Error("Authenticated user missing after auth middleware");
+  return req.user;
+};
+

@@ -1,6 +1,6 @@
 import { JWT_SECRET } from "@/config/env";
 import User from "@/models/user.model";
-import { IJwt, IRequest } from "@/types/type";
+import { IRequest } from "@/types/type";
 import logger from "@/utils/logger";
 import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
@@ -13,10 +13,16 @@ export const authMiddleware = async (
   try {
     
     // TODO: Implement access and refresh token. Also token whitelisting and blacklisting.
-    const token = req.cookies['token'];
-    const decoded = jwt.verify(token!, JWT_SECRET!) as IJwt;
+    const token: unknown = req.cookies?.token;
+    if (typeof token !== "string") {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (typeof decoded === "string" || typeof decoded.id !== "string") {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
 
-    const user = await User.findById(decoded?.id);
+    const user = await User.findById(decoded.id);
 
     if (!user) {
       logger.warn("Unauthorized");
@@ -27,9 +33,9 @@ export const authMiddleware = async (
     }
 
     req.user = user;
-    next();
+    return next();
   } catch (error) {
-    return res.status(400).json({
+    return res.status(401).json({
       success: false,
       message: "Unauthorized!",
     });

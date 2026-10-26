@@ -1,5 +1,5 @@
 import { IFrequency } from "@/types/type";
-import { model, Schema } from "mongoose";
+import { model, Schema, type HydratedDocument, type InferSchemaType } from "mongoose";
 
 const subscriptionSchema = new Schema(
   {
@@ -95,4 +95,7 @@ subscriptionSchema.pre("save", function (next) {
   next();
 });
 
-export default model("Subscription", subscriptionSchema);
+export type Subscription = InferSchemaType<typeof subscriptionSchema>;
+export type SubscriptionDocument = HydratedDocument<Subscription>;
+
+export default model<Subscription>("Subscription", subscriptionSchema);

@@ -3,7 +3,7 @@ import { ARCJET_KEY, NODE_ENV } from "./env";
 
 console.log(NODE_ENV,'eeee')
 export const aj = arcjet({
-  key: ARCJET_KEY!,
+  key: ARCJET_KEY,
 
   rules: [
     // Shield protects your app from common attacks e.g. SQL injection

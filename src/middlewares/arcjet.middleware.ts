@@ -23,9 +23,9 @@ export const arcjetMiddleware = async (
       }
     }
 
-    next();
+    return next();
   } catch (error) {
     logger.error(`Arcjet Error : ${error}`);
-    next(error);
+    return next(error);
   }
 };

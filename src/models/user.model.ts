@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import { model, Schema, type HydratedDocument, type InferSchemaType } from "mongoose";
 import validator from "validator";
 
 const userSchema = new Schema(
@@ -31,4 +31,7 @@ const userSchema = new Schema(
   { timestamps: true },
 );
 
-export default model("User", userSchema);
+export type User = InferSchemaType<typeof userSchema>;
+export type UserDocument = HydratedDocument<User>;
+
+export default model<User>("User", userSchema);

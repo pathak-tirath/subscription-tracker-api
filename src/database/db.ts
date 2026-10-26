@@ -8,7 +8,7 @@ if (!MONGO_URI) {
 
 export const connectToDB = async () => {
   try {
-    await mongoose.connect(MONGO_URI as string);
+    await mongoose.connect(MONGO_URI);
     logger.info('Mongo DB connected successfully')
   } catch (error) {
     logger.error(`Error connecting to database:- ${error}`);

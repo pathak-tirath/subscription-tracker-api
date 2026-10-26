@@ -1,14 +1,15 @@
 import { SubsStatus } from "@/enum/enum";
 import Subscription from "@/models/subscription.model";
-import { IRequest } from "@/types/type";
+import { IAuthenticatedRequest, requireAuthenticatedUser } from "@/types/type";
 import logger from "@/utils/logger";
 import { NextFunction, Response } from "express";
+import { subscriptionSchema, subscriptionStatusSchema, subscriptionUpdateSchema } from "@/validation/schemas";
 
 /**
  * Aggregation pipelines below. The pipelines are always an array
  */
 export const getAllSubscriptions = async (
-  req: IRequest,
+  req: IAuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => {
@@ -28,7 +29,7 @@ export const getAllSubscriptions = async (
     const result = await Subscription.aggregate([
       {
         $match: {
-          user: req.user!._id, // finds the subscriptions for the logged-in user.Without this, it would return all subscriptions in the database, which is a security risk.
+          user: requireAuthenticatedUser(req)._id, // finds the subscriptions for the logged-in user.Without this, it would return all subscriptions in the database, which is a security risk.
         },
       },
       {
@@ -147,12 +148,12 @@ export const getAllSubscriptions = async (
       totalAmountSaved: amountSaved,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
 export const getSubscription = async (
-  req: IRequest,
+  req: IAuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => {
@@ -167,12 +168,12 @@ export const getSubscription = async (
     }
     return res.status(200).json(subscription);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
 export const getUpcomingPayment = async (
-  req: IRequest,
+  req: IAuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => {
@@ -185,7 +186,7 @@ export const getUpcomingPayment = async (
     nextWeek.setHours(23, 59, 59, 999);
 
     const subscriptions = await Subscription.find({
-      user: req.user!._id,
+      user: requireAuthenticatedUser(req)._id,
       status: SubsStatus.ACTIVE,
       renewalDate: {
         $gte: today,
@@ -221,12 +222,13 @@ export const getUpcomingPayment = async (
 };
 
 export const postSubscription = async (
-  req: IRequest,
+  req: IAuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const subscription = { ...req.body, user: req.user!._id.toString() };
+    const input = subscriptionSchema.parse(req.body);
+    const subscription = { ...input, user: requireAuthenticatedUser(req)._id.toString() };
     if (!subscription) {
       logger.error("Error");
       return res.status(400).json({
@@ -248,18 +250,18 @@ export const postSubscription = async (
       data: subscriptionsData,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
 export const updateSubscription = async (
-  req: IRequest,
+  req: IAuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => {
   try {
     const subscriptionId = req.params.id;
-    const dataToUpdate = req.body;
+    const dataToUpdate = subscriptionUpdateSchema.parse(req.body);
 
     const subscriptionData = await Subscription.findByIdAndUpdate(
       subscriptionId,
@@ -279,12 +281,12 @@ export const updateSubscription = async (
     });
   } catch (error) {
     logger.error("Something went wrong");
-    next(error);
+    return next(error);
   }
 };
 
 export const deleteSubscription = async (
-  req: IRequest,
+  req: IAuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => {
@@ -312,18 +314,18 @@ export const deleteSubscription = async (
     });
   } catch (error) {
     logger.error(error);
-    next(error);
+    return next(error);
   }
 };
 
 export const updateStatusSubscription = async (
-  req: IRequest,
+  req: IAuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => {
   try {
     const { id } = req.params;
-    const body = req.body;
+    const body = subscriptionStatusSchema.parse(req.body);
 
     const subscriptionCancel = await Subscription.findByIdAndUpdate(id, body, {
       returnDocument: "after",
@@ -342,18 +344,18 @@ export const updateStatusSubscription = async (
       data: subscriptionCancel,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
 export const upcomingSubscriptions = async (
-  req: IRequest,
+  req: IAuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => {
   try {
     const { id } = req.params;
-    const userId = req.user!._id.toString();
+    const userId = requireAuthenticatedUser(req)._id.toString();
 
     // Check if the allowed user is trying to access
     if (userId !== id) {
@@ -378,12 +380,14 @@ export const upcomingSubscriptions = async (
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: subscription,
     });
   } catch (error) {
     logger.error(error);
-    next(error);
+    return next(error);
   }
 };
+
+

@@ -11,6 +11,8 @@ import {
 import { authMiddleware } from "@/middlewares/auth.middleware";
 import { subscriptionMiddleware } from "@/middlewares/subscription.middleware";
 import { Router } from "express";
+import { validateBody } from "@/middlewares/validate.middleware";
+import { subscriptionSchema, subscriptionStatusSchema, subscriptionUpdateSchema } from "@/validation/schemas";
 
 const subscriptionRouter = Router();
 
@@ -48,6 +50,7 @@ subscriptionRouter.post(
           startDate: '2025-01-01'
         }
   } */
+  validateBody(subscriptionSchema),
   postSubscription,
 );
 subscriptionRouter.patch(
@@ -63,12 +66,14 @@ subscriptionRouter.patch(
           price: 249
         }
   } */
+  validateBody(subscriptionUpdateSchema),
   updateSubscription,
 );
 subscriptionRouter.delete(
   "/:id",
   authMiddleware,
   subscriptionMiddleware,
+  validateBody(subscriptionStatusSchema),
   /* #swagger.tags = ['Subscriptions'] */
   deleteSubscription,
 );

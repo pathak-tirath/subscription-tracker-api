@@ -1,5 +1,5 @@
 import User from "@/models/user.model";
-import { IRequest } from "@/types/type";
+import { IAuthenticatedRequest, requireAuthenticatedUser } from "@/types/type";
 import logger from "@/utils/logger";
 import { NextFunction, Request, Response } from "express";
 
@@ -30,18 +30,18 @@ export const getUsers = async (
       })),
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
 export const getUserById = async (
-  req: IRequest,
+  req: IAuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => {
   try {
     const { id } = req.params;
-    const userId = req.user!._id.toString();
+    const userId = requireAuthenticatedUser(req)._id.toString();
 
     // Check if the allowed user is trying to access
     if (userId !== id) {
@@ -65,6 +65,8 @@ export const getUserById = async (
       data: userById,
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
+
+

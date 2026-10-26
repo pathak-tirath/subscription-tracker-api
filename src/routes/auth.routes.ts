@@ -1,5 +1,7 @@
 import { getCurrentUser, signIn, signUp } from "@/controllers/auth.controller";
 import { authMiddleware } from "@/middlewares/auth.middleware";
+import { validateBody } from "@/middlewares/validate.middleware";
+import { signInSchema, signUpSchema } from "@/validation/schemas";
 import { Router } from "express";
 const authRouter = Router();
 
@@ -14,6 +16,7 @@ authRouter.post(
             password: 'password123'
           }
     } */
+  validateBody(signUpSchema),
   signUp,
 );
 authRouter.post(
@@ -26,6 +29,7 @@ authRouter.post(
             password: 'password123'
           }
     } */
+  validateBody(signInSchema),
   signIn,
 );
 authRouter.get("/me", authMiddleware,getCurrentUser)
